@@ -1,0 +1,24 @@
+prep_no_norm__cnn_lstm_large - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       1.00      1.00      1.00       380
+          D2       1.00      0.98      0.99       332
+          D3       0.89      1.00      0.94       321
+          D4       1.00      0.90      0.95       312
+          D5       1.00      1.00      1.00       290
+
+    accuracy                           0.98      1635
+   macro avg       0.98      0.98      0.98      1635
+weighted avg       0.98      0.98      0.98      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.9761
+Precision (macro): 0.9783
+Recall (macro): 0.9753
+F1-Score (macro): 0.9757
+Precision (weighted): 0.9787
+Recall (weighted): 0.9761
+F1-Score (weighted): 0.9763

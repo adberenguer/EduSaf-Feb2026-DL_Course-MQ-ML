@@ -1,0 +1,24 @@
+prep_with_drift__cnn_lstm_large - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       0.94      0.95      0.94       380
+          D2       0.73      0.89      0.80       332
+          D3       0.70      0.75      0.73       321
+          D4       0.82      0.69      0.75       312
+          D5       0.82      0.68      0.74       290
+
+    accuracy                           0.80      1635
+   macro avg       0.80      0.79      0.79      1635
+weighted avg       0.81      0.80      0.80      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.8000
+Precision (macro): 0.8011
+Recall (macro): 0.7911
+F1-Score (macro): 0.7922
+Precision (weighted): 0.8051
+Recall (weighted): 0.8000
+F1-Score (weighted): 0.7988

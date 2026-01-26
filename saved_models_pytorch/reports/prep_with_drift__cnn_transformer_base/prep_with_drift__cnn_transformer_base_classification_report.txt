@@ -1,0 +1,24 @@
+prep_with_drift__cnn_transformer_base - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       0.84      0.94      0.89       380
+          D2       0.65      0.79      0.71       332
+          D3       0.59      0.58      0.58       321
+          D4       0.81      0.62      0.70       312
+          D5       0.71      0.63      0.67       290
+
+    accuracy                           0.72      1635
+   macro avg       0.72      0.71      0.71      1635
+weighted avg       0.72      0.72      0.72      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.7211
+Precision (macro): 0.7205
+Recall (macro): 0.7103
+F1-Score (macro): 0.7106
+Precision (weighted): 0.7242
+Recall (weighted): 0.7211
+F1-Score (weighted): 0.7179

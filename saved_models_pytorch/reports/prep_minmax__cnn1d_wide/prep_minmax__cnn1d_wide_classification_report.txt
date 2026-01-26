@@ -1,0 +1,24 @@
+prep_minmax__cnn1d_wide - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       1.00      0.71      0.83       380
+          D2       1.00      0.99      0.99       332
+          D3       0.74      1.00      0.85       321
+          D4       1.00      1.00      1.00       312
+          D5       1.00      1.00      1.00       290
+
+    accuracy                           0.93      1635
+   macro avg       0.95      0.94      0.93      1635
+weighted avg       0.95      0.93      0.93      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.9303
+Precision (macro): 0.9476
+Recall (macro): 0.9397
+F1-Score (macro): 0.9348
+Precision (weighted): 0.9485
+Recall (weighted): 0.9303
+F1-Score (weighted): 0.9298

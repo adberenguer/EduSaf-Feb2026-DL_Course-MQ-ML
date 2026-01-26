@@ -1,0 +1,24 @@
+prep_robust__cnn_transformer_large - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       0.99      0.70      0.82       380
+          D2       0.52      1.00      0.68       332
+          D3       1.00      0.01      0.01       321
+          D4       0.00      0.00      0.00       312
+          D5       0.40      0.99      0.57       290
+
+    accuracy                           0.54      1635
+   macro avg       0.58      0.54      0.42      1635
+weighted avg       0.60      0.54      0.43      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.5437
+Precision (macro): 0.5814
+Recall (macro): 0.5404
+F1-Score (macro): 0.4174
+Precision (weighted): 0.6023
+Recall (weighted): 0.5437
+F1-Score (weighted): 0.4331

@@ -1,0 +1,24 @@
+prep_with_drift__cnn1d_base - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       0.95      0.94      0.94       380
+          D2       0.74      0.88      0.81       332
+          D3       0.59      0.82      0.68       321
+          D4       0.89      0.54      0.67       312
+          D5       0.79      0.62      0.69       290
+
+    accuracy                           0.77      1635
+   macro avg       0.79      0.76      0.76      1635
+weighted avg       0.80      0.77      0.77      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.7706
+Precision (macro): 0.7905
+Recall (macro): 0.7593
+F1-Score (macro): 0.7594
+Precision (weighted): 0.7954
+Recall (weighted): 0.7706
+F1-Score (weighted): 0.7681

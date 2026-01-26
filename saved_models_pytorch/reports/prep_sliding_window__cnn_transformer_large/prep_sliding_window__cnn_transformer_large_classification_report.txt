@@ -1,0 +1,24 @@
+prep_sliding_window__cnn_transformer_large - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       0.23      1.00      0.38     37851
+          D2       0.00      0.00      0.00     33042
+          D3       0.00      0.00      0.00     31992
+          D4       0.00      0.00      0.00     31080
+          D5       0.00      0.00      0.00     28956
+
+    accuracy                           0.23    162921
+   macro avg       0.05      0.20      0.08    162921
+weighted avg       0.05      0.23      0.09    162921
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.2323
+Precision (macro): 0.0465
+Recall (macro): 0.2000
+F1-Score (macro): 0.0754
+Precision (weighted): 0.0540
+Recall (weighted): 0.2323
+F1-Score (weighted): 0.0876

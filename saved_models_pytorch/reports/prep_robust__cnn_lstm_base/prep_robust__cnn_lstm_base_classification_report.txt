@@ -1,0 +1,24 @@
+prep_robust__cnn_lstm_base - Classification Report
+============================================================
+              precision    recall  f1-score   support
+
+          D1       1.00      1.00      1.00       380
+          D2       1.00      0.96      0.98       332
+          D3       0.96      1.00      0.98       321
+          D4       1.00      1.00      1.00       312
+          D5       1.00      1.00      1.00       290
+
+    accuracy                           0.99      1635
+   macro avg       0.99      0.99      0.99      1635
+weighted avg       0.99      0.99      0.99      1635
+
+
+Summary Metrics
+============================================================
+Accuracy: 0.9908
+Precision (macro): 0.9910
+Recall (macro): 0.9909
+F1-Score (macro): 0.9908
+Precision (weighted): 0.9912
+Recall (weighted): 0.9908
+F1-Score (weighted): 0.9908
