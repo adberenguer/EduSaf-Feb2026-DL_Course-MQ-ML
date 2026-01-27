@@ -1181,7 +1181,7 @@ if page == "🏠 Home":
         - **Windowing**: non‑overlapping windows (default), sliding window (`stride=1`), or custom stride (`stride=N`).
         - **Drift handling**: `baseline` (subtract first value), `relative` (change relative to baseline), `moving_baseline` (moving average baseline).
 
-        **Model configurations (what gets trained)**
+        **Model architectures (what was trained)**
         - **CNN1D**: convolutional layers extract features, followed by fully‑connected layers.
         - **CNN_LSTM**: convolutional layers + LSTM for temporal patterns.
         - Hyperparameters shown in labels (e.g., conv layers, LSTM layers, FC layers, activation).
