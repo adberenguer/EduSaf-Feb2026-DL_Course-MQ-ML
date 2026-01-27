@@ -1168,9 +1168,9 @@ if page == "🏠 Home":
     
     st.markdown("""
         <div class="info-box">
-            <h3>📋 About This Dashboard</h3>
-            <p>This dashboard loads and compares <strong>pre-trained</strong> model configurations with different hyperparameters for educational purposes.</p>
-            <p><strong>Note:</strong> Models were pre-trained in advance, not using this demo app. This dashboard is for visualization and inference only.</p>
+            <h3>📋 About This Demo App</h3>
+            <p>This demo app loads and compares <strong>pre-trained</strong> model configurations with different hyperparameters for educational purposes.</p>
+            <p><strong>Note:</strong> Models were pre-trained in advance, not using this demo app. This demo app is for visualization and analysis of the models outputs or inference only.</p>
         </div>
     """, unsafe_allow_html=True)
 
