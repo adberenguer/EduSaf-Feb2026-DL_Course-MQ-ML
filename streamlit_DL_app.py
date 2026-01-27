@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 # Set page config with fancy theme
 st.set_page_config(
-    page_title="🍎 Fruit Quality Monitoring - Deep Learning Dashboard",
+    page_title="🍎 Fruit Quality Monitoring Demo app | Deep Learning Models",
     page_icon="🍎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -1160,6 +1160,9 @@ if page == "🏠 Home":
         <div class="main-header">
             <h1>🍎 Fruit Quality Monitoring</h1>
             <p>Deep Learning Dashboard - Compare Multiple Model Configurations</p>
+             <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and ML classify fruit freshness in real time to improve safety, reduce waste, and support smarter supply chains?</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Industry 4.0, Agri 5.0, IoT-ready, and sustainability focused.</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Multiple Deep Learning models (1D CNN, 1D CNN+LSTM), Training and evaluation pipeline using PyTorch, Decision rules for quality control</small></p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -1507,9 +1510,7 @@ elif page == "🔮 Make Prediction":
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center; color: #666; padding: 1rem;'>
-        <p style='font-size: 1.05rem; font-weight: 600;'>🍎 Fruit Quality Monitoring Demo | Deep Learning Models</p>
-        <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and ML classify fruit freshness in real time to improve safety, reduce waste, and support smarter supply chains?</small></p>
-        <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Industry 4.0, Agri 5.0, IoT-ready, and sustainability focused.</small></p>
+        <p style='font-size: 1.05rem; font-weight: 600;'>🍎 Fruit Quality Monitoring Demo app| Deep Learning Models</p>
         <p style='margin: 0.35rem 0;'><small>Compare multiple pre-trained DL models for fruit freshness classification.</small></p>
     </div>
 """, unsafe_allow_html=True)
