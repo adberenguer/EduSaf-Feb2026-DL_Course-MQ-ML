@@ -1163,7 +1163,7 @@ if page == "🏠 Home":
              <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and DL models classify fruit freshness to improve safety, reduce waste, and support smarter supply chains?</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Supports smart agriculture, IoT monitoring, and sustainability.</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Pretrained Deep Learning models (1D CNN, 1D CNN+LSTM), Clear performance charts, and Decision rules for quality control</small></p>
-            <p style='margin: 0.35rem 0;'><small><strong>Note:</strong>Users can use this app to visualize the models outputs and analyse the effect of different preprocessing and model architectures on the model performance.</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Note:</strong> Participants can use this app to visualize the models outputs and analyse the effect of different preprocessing and model architectures on the model performance.</small></p>
     """, unsafe_allow_html=True)
     
     st.markdown("""
