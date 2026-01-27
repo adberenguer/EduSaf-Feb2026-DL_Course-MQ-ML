@@ -1160,10 +1160,10 @@ if page == "🏠 Home":
         <div class="main-header">
             <h1>🍎 Fruit Quality Monitoring</h1>
             <p>Deep Learning Dashboard - Compare Multiple Model Configurations</p>
-             <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and ML classify fruit freshness in real time to improve safety, reduce waste, and support smarter supply chains?</small></p>
-            <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Industry 4.0, Agri 5.0, IoT-ready, and sustainability focused.</small></p>
-            <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Multiple Deep Learning models (1D CNN, 1D CNN+LSTM), Training and evaluation pipeline using PyTorch, Decision rules for quality control</small></p>
-        </div>
+             <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and DL models classify fruit freshness to improve safety, reduce waste, and support smarter supply chains?</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Supports smart agriculture, IoT monitoring, and sustainability.</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Pretrained Deep Learning models (1D CNN, 1D CNN+LSTM), Clear performance charts, and Decision rules for quality control</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Note:</strong>Users can use this app to visualize the models outputs and analyse the effect of different preprocessing and model architectures on the model performance.</small></p>
     """, unsafe_allow_html=True)
     
     st.markdown("""
