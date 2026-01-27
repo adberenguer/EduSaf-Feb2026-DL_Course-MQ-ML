@@ -21,7 +21,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precisio
 
 # Set page config
 st.set_page_config(
-    page_title="Classification of fresh fruit types based on MQ array sensor data | ML Models | Following the approach proposed by Hananto & Ridwan (2025)",
+    page_title="Classification of fresh fruit types based on MQ array sensor data",
     page_icon="🍎",
     layout="wide"
 )
@@ -241,7 +241,7 @@ def plot_confusion_matrix(y_test, y_pred, label_to_name, model_name):
     return fig
 
 # Main App
-st.markdown('<h1 class="main-header">🍎 Fruit Freshness Classification ML Pipeline</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🍎 Fruit Classification ML Pipeline | Following the approach proposed by Hananto & Ridwan (2025)</h1>', unsafe_allow_html=True)
 st.markdown(
     "<div class='metric-card'>"
     "<b>Reference:</b> Hananto & Ridwan (2025) — Performance comparison of algorithms in the classification "
