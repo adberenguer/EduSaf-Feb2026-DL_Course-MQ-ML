@@ -4,25 +4,25 @@ import numpy as np
 import os
 import glob
 import joblib
+import time
 from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Machine Learning imports
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precision_score, recall_score
 
 # Set page config
 st.set_page_config(
-    page_title="Fruit Classification FROM MQ SENSOR DATA ML Pipeline",
-    page_icon="🍎 MQ SENSOR DATA",
+    page_title="Fruit Freshness Classification | Hananto & Ridwan (2025)",
+    page_icon="🍎",
     layout="wide"
 )
 
@@ -83,172 +83,136 @@ def load_data():
     return full_dataframe, label_to_name, fruit_mapping
 
 def define_models():
-    """Define all models with preprocessing pipelines"""
+    """Define models aligned with Hananto & Ridwan (2025)"""
     models = {
         'ANN (MLP)': Pipeline([
             ('scaler', StandardScaler()),
-            ('classifier', MLPClassifier(
-                hidden_layer_sizes=(100, 50),
-                max_iter=500,
-                random_state=42,
-                early_stopping=True,
-                validation_fraction=0.1
-            ))
+            ('classifier', MLPClassifier(max_iter=500, random_state=42))
         ]),
         'KNN': Pipeline([
             ('scaler', StandardScaler()),
-            ('classifier', KNeighborsClassifier(n_neighbors=5))
-        ]),
-        'SVM': Pipeline([
-            ('scaler', StandardScaler()),
-            ('classifier', SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42))
+            ('classifier', KNeighborsClassifier())
         ]),
         'Logistic Regression': Pipeline([
             ('scaler', StandardScaler()),
             ('classifier', LogisticRegression(max_iter=1000, random_state=42))
         ]),
-        'XGBoost': Pipeline([
-            ('scaler', StandardScaler()),
-            ('classifier', XGBClassifier(
-                random_state=42,
-                eval_metric='mlogloss',
-                use_label_encoder=False
-            ))
+        'Random Forest': Pipeline([
+            ('scaler', 'passthrough'),
+            ('classifier', RandomForestClassifier(random_state=42))
         ])
     }
     return models
 
-def train_and_evaluate(X_temp, y_temp, X_test, y_test, models):
-    """Train models and evaluate"""
-    # K-Fold Cross-Validation
-    kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    cv_results = {}
-    
-    progress_bar = st.progress(0)
-    status_text = st.empty()
-    
-    # Cross-validation
-    total_models = len(models)
-    for idx, (name, model) in enumerate(models.items()):
-        status_text.text(f"Performing cross-validation for {name}...")
-        cv_scores = cross_val_score(model, X_temp, y_temp, cv=kfold, scoring='accuracy', n_jobs=-1)
-        cv_f1_scores = cross_val_score(model, X_temp, y_temp, cv=kfold, scoring='f1_macro', n_jobs=-1)
-        
-        cv_results[name] = {
-            'accuracy_mean': cv_scores.mean(),
-            'accuracy_std': cv_scores.std(),
-            'f1_mean': cv_f1_scores.mean(),
-            'f1_std': cv_f1_scores.std()
-        }
-        progress_bar.progress((idx + 1) / total_models / 2)  # Half progress for CV
-    
-    # Train final models
+def train_and_evaluate(X_train, y_train, X_test, y_test, models):
+    """Train models and evaluate with paper-aligned metrics"""
     trained_models = {}
     test_results = {}
-    
+
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    total_models = len(models)
+
     for idx, (name, model) in enumerate(models.items()):
         status_text.text(f"Training {name}...")
-        model.fit(X_temp, y_temp)
+        start_train = time.perf_counter()
+        model.fit(X_train, y_train)
+        train_time = time.perf_counter() - start_train
         trained_models[name] = model
-        
+
+        status_text.text(f"Testing {name}...")
+        start_test = time.perf_counter()
         y_pred = model.predict(X_test)
+        test_time = time.perf_counter() - start_test
+
         accuracy = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred, average='macro')
-        
+        precision = precision_score(y_test, y_pred, average='macro', zero_division=0)
+        recall = recall_score(y_test, y_pred, average='macro', zero_division=0)
+        f1 = f1_score(y_test, y_pred, average='macro', zero_division=0)
+
         test_results[name] = {
             'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
             'f1_score': f1,
+            'train_time': train_time,
+            'test_time': test_time,
             'y_pred': y_pred
         }
-        progress_bar.progress(0.5 + (idx + 1) / total_models / 2)
-    
+        progress_bar.progress((idx + 1) / total_models)
+
     status_text.text("Training complete!")
     progress_bar.empty()
     status_text.empty()
-    
-    return trained_models, cv_results, test_results
 
-def plot_performance_comparison(cv_results, test_results):
-    """Plot performance comparison (accuracy & F1-score, with error bars for CV) -- classic bar plot version."""
-    import seaborn as sns
-    import pandas as pd
+    return trained_models, test_results
+
+def plot_performance_comparison(test_results):
+    """Plot performance comparison (accuracy, precision, recall, F1-score)."""
     import numpy as np
 
-    models = list(cv_results.keys())
+    models = list(test_results.keys())
+    metrics = [
+        ("Accuracy", "accuracy"),
+        ("Precision", "precision"),
+        ("Recall", "recall"),
+        ("F1-Score", "f1_score")
+    ]
 
-    # Prepare table for plotting
-    acc_cv = [cv_results[m]['accuracy_mean'] for m in models]
-    acc_cv_std = [cv_results[m]['accuracy_std'] for m in models]
-    acc_test = [test_results[m]['accuracy'] for m in models]
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharey=True)
+    axes = axes.flatten()
 
-    f1_cv = [cv_results[m]['f1_mean'] for m in models]
-    f1_cv_std = [cv_results[m]['f1_std'] for m in models]
-    f1_test = [test_results[m]['f1_score'] for m in models]
-
-    x = np.arange(len(models))
-
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
-    sns.set(style="whitegrid", font_scale=1.15)
-
-    # Accuracy
-    width = 0.35
-    axes[0].bar(x - width/2, acc_cv, width, yerr=acc_cv_std, capsize=6, label="CV Accuracy", color="tab:blue")
-    axes[0].bar(x + width/2, acc_test, width, label="Test Accuracy", color="tab:orange")
-    axes[0].set_title("Model Accuracy")
-    axes[0].set_xticks(x)
-    axes[0].set_xticklabels(models, rotation=25, ha='right')
-    axes[0].set_ylim(0.7, 1.01)
-    axes[0].set_ylabel("Accuracy")
-    axes[0].set_xlabel("Models")
-    axes[0].legend(title="", loc="lower right")
-
-    # F1-score
-    axes[1].bar(x - width/2, f1_cv, width, yerr=f1_cv_std, capsize=6, label="CV F1-score", color="tab:blue")
-    axes[1].bar(x + width/2, f1_test, width, label="Test F1-score", color="tab:orange")
-    axes[1].set_title("Model F1-Score")
-    axes[1].set_xticks(x)
-    axes[1].set_xticklabels(models, rotation=25, ha='right')
-    axes[1].set_ylim(0.7, 1.01)
-    axes[1].set_ylabel("F1-Score")
-    axes[1].set_xlabel("Models")
-    axes[1].legend(title="", loc="lower right")
+    for ax, (title, key) in zip(axes, metrics):
+        values = [test_results[m][key] for m in models]
+        ax.bar(np.arange(len(models)), values, color="tab:blue", alpha=0.85)
+        ax.set_title(title)
+        ax.set_xticks(np.arange(len(models)))
+        ax.set_xticklabels(models, rotation=25, ha='right')
+        ax.set_ylim(0, 1.05)
+        ax.set_ylabel(title)
+        ax.grid(axis='y', linestyle='--', alpha=0.4)
 
     plt.tight_layout()
     return fig
 
-    # --- Plot F1-score ---
-    for metric, mkr, color in zip(["CV F1-score", "Test F1-score"], ["o", "s"], ["tab:blue", "tab:orange"]):
-        df_plot = df_f1[df_f1["Metric"] == metric]
-        axes[1].scatter(
-            np.arange(len(models)), 
-            df_plot["Value"], 
-            label=metric, 
-            marker=mkr, 
-            s=90, 
-            c=color
-        )
-        # Only apply error bars for CV metrics
-        if metric == "CV F1-score":
-            axes[1].errorbar(
-                np.arange(len(models)),
-                df_plot["Value"],
-                yerr=df_plot["Std"],
-                fmt='none',
-                ecolor=color,
-                elinewidth=2,
-                capsize=7
-            )
+def plot_performance_comparison_legacy(test_results):
+    """Plot comparison for legacy metadata (accuracy & F1-score only)."""
+    import numpy as np
 
-    axes[1].set_title("Model F1-Score")
-    axes[1].set_xticks(np.arange(len(models)))
-    axes[1].set_xticklabels(models, rotation=30, ha='right')
-    axes[1].set_ylabel("F1-Score")
-    axes[1].set_xlabel("Models")
-    axes[1].set_ylim(0.7, 1.01)
-    axes[1].legend(title="", loc="lower right")
+    models = list(test_results.keys())
+    metrics = [
+        ("Accuracy", "accuracy"),
+        ("F1-Score", "f1_score")
+    ]
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4), sharey=True)
+    axes = axes.flatten()
+
+    for ax, (title, key) in zip(axes, metrics):
+        values = [test_results[m][key] for m in models]
+        ax.bar(np.arange(len(models)), values, color="tab:orange", alpha=0.85)
+        ax.set_title(title)
+        ax.set_xticks(np.arange(len(models)))
+        ax.set_xticklabels(models, rotation=25, ha='right')
+        ax.set_ylim(0, 1.05)
+        ax.set_ylabel(title)
+        ax.grid(axis='y', linestyle='--', alpha=0.4)
 
     plt.tight_layout()
     return fig
+
+def map_model_filename_to_label(filename):
+    """Map saved model filenames to display names."""
+    base = os.path.basename(filename).replace(".joblib", "")
+    mapping = {
+        "ann_mlp": "ANN (MLP)",
+        "knn": "KNN",
+        "logistic_regression": "Logistic Regression",
+        "random_forest": "Random Forest",
+        "svm": "SVM (Legacy)",
+        "xgboost": "XGBoost (Legacy)"
+    }
+    return mapping.get(base, base.replace("_", " ").title())
 
 def plot_confusion_matrix(y_test, y_pred, label_to_name, model_name):
     """Plot confusion matrix with robust handling and Streamlit support"""
@@ -277,7 +241,16 @@ def plot_confusion_matrix(y_test, y_pred, label_to_name, model_name):
     return fig
 
 # Main App
-st.markdown('<h1 class="main-header">🍎 Fruit Classification ML Pipeline</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🍎 Fruit Freshness Classification ML Pipeline</h1>', unsafe_allow_html=True)
+st.markdown(
+    "<div class='metric-card'>"
+    "<b>Reference:</b> Hananto & Ridwan (2025) — Performance comparison of algorithms in the classification "
+    "of fresh fruit types based on MQ array sensor data. "
+    "This app mirrors the paper’s workflow: combine dataset CSVs, random train/test split, "
+    "then evaluate ANN, KNN, Logistic Regression, and Random Forest using accuracy, precision, recall, and F1."
+    "</div>",
+    unsafe_allow_html=True
+)
 
 # Sidebar
 st.sidebar.header("Navigation")
@@ -292,13 +265,12 @@ if page == "Train Models":
     st.header("Train Machine Learning Models")
     
     # List the models that will be trained
-    st.markdown("**Models to be trained:**")
+    st.markdown("**Models to be trained (paper-aligned):**")
     model_names = [
-        "K-Nearest Neighbors",
-        "Support Vector Machine (SVM)",
-        "Logistic Regression",
         "Artificial Neural Network (MLPClassifier)",
-        "XGBoost Classifier"
+        "K-Nearest Neighbors (KNN)",
+        "Logistic Regression (LR)",
+        "Random Forest (RF)"
     ]
     st.markdown("<br>".join(model_names) + "<br>", unsafe_allow_html=True)
     
@@ -313,20 +285,20 @@ if page == "Train Models":
         X = full_dataframe[feature_columns].values
         y = full_dataframe['label'].values
         
-        # Split data
-        X_temp, X_test, y_temp, y_test = train_test_split(
+        # Random split (paper-aligned)
+        X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=42, stratify=y
         )
         
-        st.info(f"📊 Dataset split: Train+Val ({len(X_temp)} samples), Test ({len(X_test)} samples)")
+        st.info(f"📊 Dataset split: Train ({len(X_train)} samples), Test ({len(X_test)} samples)")
         
         # Define models
         models = define_models()
         
         # Train and evaluate
         with st.spinner("Training models... This may take a few minutes."):
-            trained_models, cv_results, test_results = train_and_evaluate(
-                X_temp, y_temp, X_test, y_test, models
+            trained_models, test_results = train_and_evaluate(
+                X_train, y_train, X_test, y_test, models
             )
         
         # Save models
@@ -342,9 +314,8 @@ if page == "Train Models":
         metadata = {
             'label_to_name': label_to_name,
             'feature_columns': feature_columns,
-            'test_results': {k: {'accuracy': v['accuracy'], 'f1_score': v['f1_score']} 
-                           for k, v in test_results.items()},
-            'cv_results': cv_results,
+            'test_results': test_results,
+            'y_test': y_test,
             'saved_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
         
@@ -353,7 +324,6 @@ if page == "Train Models":
         
         # Store in session state
         st.session_state['trained_models'] = trained_models
-        st.session_state['cv_results'] = cv_results
         st.session_state['test_results'] = test_results
         st.session_state['y_test'] = y_test
         st.session_state['label_to_name'] = label_to_name
@@ -367,14 +337,17 @@ if page == "Train Models":
         for name in models.keys():
             summary_data.append({
                 'Model': name,
-                'CV Accuracy': f"{cv_results[name]['accuracy_mean']:.4f} ± {cv_results[name]['accuracy_std']:.4f}",
-                'Test Accuracy': f"{test_results[name]['accuracy']:.4f}",
-                'Test F1-Score': f"{test_results[name]['f1_score']:.4f}"
+                'Accuracy': f"{test_results[name]['accuracy']:.4f}",
+                'Precision': f"{test_results[name]['precision']:.4f}",
+                'Recall': f"{test_results[name]['recall']:.4f}",
+                'F1-Score': f"{test_results[name]['f1_score']:.4f}",
+                'Train Time (s)': f"{test_results[name]['train_time']:.2f}",
+                'Test Time (s)': f"{test_results[name]['test_time']:.2f}"
             })
         
         summary_df = pd.DataFrame(summary_data)
-        summary_df = summary_df.sort_values('Test Accuracy', ascending=False, 
-                                           key=lambda x: x.str.split().str[0].astype(float))
+        summary_df = summary_df.sort_values('Accuracy', ascending=False,
+                                           key=lambda x: x.astype(float))
         st.dataframe(summary_df, use_container_width=True)
 
 elif page == "View Performance":
@@ -391,52 +364,68 @@ elif page == "View Performance":
         if os.path.exists(metadata_path):
             st.info("📂 Found saved models. Loading...")
             metadata = joblib.load(metadata_path)
-            st.session_state['cv_results'] = metadata['cv_results']
             st.session_state['test_results'] = metadata['test_results']
             st.session_state['label_to_name'] = metadata['label_to_name']
+            st.session_state['y_test'] = metadata.get('y_test')
             st.session_state['models_trained'] = True
             st.success("✓ Loaded saved models!")
         else:
             st.stop()
     
-    cv_results = st.session_state.get('cv_results', {})
     test_results = st.session_state.get('test_results', {})
     
-    if not cv_results or not test_results:
+    if not test_results:
         st.error("No performance data available.")
         st.stop()
     
     # Performance comparison plot
     st.subheader("Performance Comparison")
-    fig = plot_performance_comparison(cv_results, test_results)
+    required_metrics = {"accuracy", "precision", "recall", "f1_score", "train_time", "test_time"}
+    is_full_metrics = all(required_metrics.issubset(test_results[name].keys()) for name in test_results.keys())
+    if is_full_metrics:
+        fig = plot_performance_comparison(test_results)
+    else:
+        fig = plot_performance_comparison_legacy(test_results)
     st.pyplot(fig)
     
     # Detailed metrics table
     st.subheader("Detailed Metrics")
     metrics_data = []
-    for name in cv_results.keys():
-        metrics_data.append({
-            'Model': name,
-            'CV Accuracy (Mean)': f"{cv_results[name]['accuracy_mean']:.4f}",
-            'CV Accuracy (Std)': f"{cv_results[name]['accuracy_std']:.4f}",
-            'Test Accuracy': f"{test_results[name]['accuracy']:.4f}",
-            'CV F1-Score (Mean)': f"{cv_results[name]['f1_mean']:.4f}",
-            'CV F1-Score (Std)': f"{cv_results[name]['f1_std']:.4f}",
-            'Test F1-Score': f"{test_results[name]['f1_score']:.4f}"
-        })
+    if is_full_metrics:
+        for name in test_results.keys():
+            metrics_data.append({
+                'Model': name,
+                'Accuracy': test_results[name]['accuracy'],
+                'Precision': test_results[name]['precision'],
+                'Recall': test_results[name]['recall'],
+                'F1-Score': test_results[name]['f1_score'],
+                'Train Time (s)': test_results[name]['train_time'],
+                'Test Time (s)': test_results[name]['test_time']
+            })
+    else:
+        st.warning("⚠️ Performance data is from an older format. Retrain to show precision/recall and timing.")
+        for name in test_results.keys():
+            metrics_data.append({
+                'Model': name,
+                'Accuracy': test_results[name].get('accuracy'),
+                'F1-Score': test_results[name].get('f1_score')
+            })
     
     metrics_df = pd.DataFrame(metrics_data)
-    metrics_df = metrics_df.sort_values('Test Accuracy', ascending=False,
-                                       key=lambda x: x.str.split().str[0].astype(float))
+    sort_column = 'Accuracy' if 'Accuracy' in metrics_df.columns else metrics_df.columns[1]
+    metrics_df = metrics_df.sort_values(sort_column, ascending=False)
     st.dataframe(metrics_df, use_container_width=True)
     
     # Best model
     best_model = metrics_df.iloc[0]['Model']
-    st.success(f"🏆 Best Model: **{best_model}** (Test Accuracy: {metrics_df.iloc[0]['Test Accuracy']})")
+    if 'Accuracy' in metrics_df.columns:
+        st.success(f"🏆 Best Model: **{best_model}** (Accuracy: {metrics_df.iloc[0]['Accuracy']:.4f})")
+    else:
+        st.success(f"🏆 Best Model: **{best_model}**")
     
     # Confusion matrix for selected model
     st.subheader("Confusion Matrix")
-    selected_model = st.selectbox("Select Model", list(cv_results.keys()))
+    selected_model = st.selectbox("Select Model", list(test_results.keys()))
     
     # Check if we have the necessary data to plot confusion matrix
     y_test = st.session_state.get('y_test')
@@ -485,21 +474,34 @@ elif page == "Make Prediction":
                 col_name, min_value=0, max_value=10000, value=100, key=f"input_{col_name}"
             )
     
-    # Model selection
-    model_files = glob.glob(os.path.join(models_dir, "*.joblib"))
-    model_files = [f for f in model_files if 'metadata' not in f]
-    
-    if not model_files:
-        st.error("No model files found!")
+    # Model selection (paper-aligned, with legacy fallback)
+    model_names = list(metadata.get('test_results', {}).keys())
+    model_file_map = {}
+
+    if model_names:
+        for name in model_names:
+            model_filename = name.replace(' ', '_').replace('(', '').replace(')', '').lower()
+            model_path = os.path.join(models_dir, f"{model_filename}.joblib")
+            if os.path.exists(model_path):
+                model_file_map[name] = model_path
+
+    if not model_file_map:
+        legacy_files = [f for f in glob.glob(os.path.join(models_dir, "*.joblib")) if "metadata" not in f]
+        for path in legacy_files:
+            label = map_model_filename_to_label(path)
+            model_file_map[label] = path
+        if any("Legacy" in name for name in model_file_map.keys()):
+            st.info("ℹ️ Using legacy models (SVM/XGBoost). Retrain to align with the Hananto paper.")
+
+    if not model_file_map:
+        st.error("No model files found! Please train models first.")
         st.stop()
-    
-    selected_model_file = st.selectbox("Select Model", 
-                                      [os.path.basename(f).replace('.joblib', '') for f in model_files])
+
+    selected_model_name = st.selectbox("Select Model", list(model_file_map.keys()))
     
     if st.button("🔮 Predict", type="primary"):
         # Load model
-        model_path = os.path.join(models_dir, f"{selected_model_file}.joblib")
-        model = joblib.load(model_path)
+        model = joblib.load(model_file_map[selected_model_name])
         
         # Prepare input
         input_data = np.array([[sensor_values[col] for col in feature_columns]])
