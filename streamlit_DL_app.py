@@ -1507,7 +1507,9 @@ elif page == "🔮 Make Prediction":
 st.markdown("---")
 st.markdown("""
     <div style='text-align: center; color: #666; padding: 1rem;'>
-        <p>🍎 Fruit Quality Monitoring Dashboard | Deep Learning Models</p>
-        <p><small>Compare multiple pre-trained model configurations</small></p>
+        <p style='font-size: 1.05rem; font-weight: 600;'>🍎 Fruit Quality Monitoring Demo | Deep Learning Models</p>
+        <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and ML classify fruit freshness in real time to improve safety, reduce waste, and support smarter supply chains?</small></p>
+        <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Industry 4.0, Agri 5.0, IoT-ready, and sustainability focused.</small></p>
+        <p style='margin: 0.35rem 0;'><small>Compare multiple pre-trained DL models for fruit freshness classification.</small></p>
     </div>
 """, unsafe_allow_html=True)
