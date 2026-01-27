@@ -1159,7 +1159,7 @@ if page == "🏠 Home":
     st.markdown("""
         <div class="main-header">
             <h1>🍎 Fruit Quality Monitoring</h1>
-            <p>Deep Learning Dashboard - Compare Multiple Model Configurations</p>
+            <p>Deep Learning Dashboard - Compare Different Preprocessing Configurations and Model Architectures</p>
              <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can low-cost MQ gas sensors and DL models classify fruit freshness to improve safety, reduce waste, and support smarter supply chains?</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Supports smart agriculture, IoT monitoring, and sustainability.</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Pretrained Deep Learning models (1D CNN, 1D CNN+LSTM), Clear performance charts, and Decision rules for quality control</small></p>
