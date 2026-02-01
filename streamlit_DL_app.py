@@ -1167,7 +1167,7 @@ st.sidebar.title("🍎 Navigation")
 page = st.sidebar.radio("Go to", ["🏠 Home", "📊 Model Comparison", "🔍 Training Analysis", "🔮 Make Prediction"])
 
 # Home page
-if page == "🛠️ Train Models":
+if page == "🏠 Home":
     st.markdown("""
         <div class="main-header">
             <h1>🍎 Fruit Quality Monitoring</h1>
