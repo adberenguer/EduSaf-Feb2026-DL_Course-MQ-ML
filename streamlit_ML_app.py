@@ -5,6 +5,7 @@ import os
 import glob
 import joblib
 import time
+import importlib.util
 from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -18,6 +19,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precision_score, recall_score
+from sklearn.svm import SVC
+HAS_XGBOOST = importlib.util.find_spec("xgboost") is not None
 
 # Set page config
 st.set_page_config(
@@ -41,6 +44,13 @@ st.markdown("""
         padding: 1rem;
         border-radius: 0.5rem;
         margin: 0.5rem 0;
+    }
+    .info-box {
+        background: #eef5ff;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #1f77b4;
+        margin: 1rem 0;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -83,7 +93,7 @@ def load_data():
     return full_dataframe, label_to_name, fruit_mapping
 
 def define_models():
-    """Define models aligned with Hananto & Ridwan (2025)"""
+    """Define all available models (paper + legacy)"""
     models = {
         'ANN (MLP)': Pipeline([
             ('scaler', StandardScaler()),
@@ -100,8 +110,23 @@ def define_models():
         'Random Forest': Pipeline([
             ('scaler', 'passthrough'),
             ('classifier', RandomForestClassifier(random_state=42))
-        ])
+        ]),
+        'SVM': Pipeline([
+            ('scaler', StandardScaler()),
+            ('classifier', SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42))
+        ]),
     }
+    if HAS_XGBOOST:
+        xgb_module = importlib.import_module("xgboost")
+        xgb_classifier = getattr(xgb_module, "XGBClassifier")
+        models['XGBoost'] = Pipeline([
+            ('scaler', StandardScaler()),
+            ('classifier', xgb_classifier(
+                random_state=42,
+                eval_metric='mlogloss',
+                use_label_encoder=False
+            ))
+        ])
     return models
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, models):
@@ -254,24 +279,84 @@ st.markdown(
 
 # Sidebar
 st.sidebar.header("Navigation")
-page = st.sidebar.radio("Select Page", ["Train Models", "View Performance", "Make Prediction"])
+page = st.sidebar.radio(
+    "Go to",
+    ["🏠 Home", "🛠️ Train Models", "📊 View Performance", "🔮 Make Prediction"]
+)
 
 # Load data (cached)
 @st.cache_data
 def load_cached_data():
     return load_data()
 
-if page == "Train Models":
+if page == "🏠 Home":
+    st.markdown("""
+        <div class="main-header">
+            <h1>🍎 Machine Learning Dashboard - Fruit Freshness Classification</h1>
+            <p>Machine Learning Dashboard — Hananto & Ridwan (2025) inspired workflow</p>
+            <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can MQ gas sensors classify fresh fruit types to improve quality monitoring?</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Non‑destructive, low‑cost monitoring for smart agriculture and supply chains.</small></p>
+            <p style='margin: 0.35rem 0;'><small><strong>Output:</strong> Trained ML models with accuracy, precision, recall, and F1 metrics.</small></p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="info-box">
+            <h3>📋 About This App</h3>
+            <p>This app follows the workflow described in the Hananto & Ridwan (2025) paper: combine CSV samples, random train/test split, then evaluate multiple algorithms.</p>
+            <p><strong>Models:</strong> ANN (MLP), KNN, Logistic Regression, Random Forest, SVM, and optional XGBoost.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    with st.expander("📘 Workflow & Metrics Guide", expanded=False):
+        st.markdown("""
+        **Workflow**
+        - Combine all fruit CSV files (excluding D1–D5 drift files).
+        - Random train/test split (80/20).
+        - Train each algorithm and compare metrics.
+
+        **Metrics**
+        - **Accuracy**: overall correctness.
+        - **Precision/Recall/F1**: macro‑averaged across fruit classes.
+        - **Train/Test Time**: measured per model for efficiency comparison.
+        """)
+
+    try:
+        full_dataframe, label_to_name, fruit_mapping = load_cached_data()
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Samples", f"{len(full_dataframe)}")
+        col2.metric("Fruit Types", f"{len(label_to_name)}")
+        col3.metric("Sensors", "9 (MQ2–MQ135)")
+    except Exception as exc:
+        st.warning("⚠️ Could not load dataset summary.")
+        st.caption(f"Reason: {exc}")
+
+    model_files = [f for f in glob.glob(os.path.join("saved_models", "*.joblib")) if "metadata" not in f]
+    if model_files:
+        st.markdown("### 📦 Available Saved Models")
+        model_df = pd.DataFrame({
+            "Model": [map_model_filename_to_label(f) for f in model_files],
+            "File": [os.path.basename(f) for f in model_files]
+        }).sort_values("Model")
+        st.dataframe(model_df, use_container_width=True)
+    else:
+        st.info("ℹ️ No saved models found yet. Train models to create them.")
+
+elif page == "Train Models":
     st.header("Train Machine Learning Models")
     
     # List the models that will be trained
-    st.markdown("**Models to be trained (paper-aligned):**")
+    st.markdown("**Models to be trained (all available):**")
     model_names = [
         "Artificial Neural Network (MLPClassifier)",
         "K-Nearest Neighbors (KNN)",
         "Logistic Regression (LR)",
-        "Random Forest (RF)"
+        "Random Forest (RF)",
+        "Support Vector Machine (SVM)",
+        "XGBoost Classifier"
     ]
+    if not HAS_XGBOOST:
+        st.caption("ℹ️ XGBoost listed but not installed; install `xgboost` to enable training.")
     st.markdown("<br>".join(model_names) + "<br>", unsafe_allow_html=True)
     
     if st.button("🔄 Train All Models", type="primary"):
@@ -448,14 +533,26 @@ elif page == "Make Prediction":
     # Check if models exist
     models_dir = 'saved_models'
     metadata_path = os.path.join(models_dir, 'metadata.joblib')
-    
-    if not os.path.exists(metadata_path):
-        st.warning("⚠️ No trained models found. Please train models first.")
-        st.stop()
-    
-    metadata = joblib.load(metadata_path)
-    label_to_name = metadata['label_to_name']
-    feature_columns = metadata['feature_columns']
+
+    metadata = None
+    label_to_name = None
+    feature_columns = ['MQ2', 'MQ3', 'MQ4', 'MQ5', 'MQ6', 'MQ7', 'MQ8', 'MQ9', 'MQ135']
+
+    if os.path.exists(metadata_path):
+        try:
+            metadata = joblib.load(metadata_path)
+            label_to_name = metadata.get('label_to_name')
+            feature_columns = metadata.get('feature_columns', feature_columns)
+        except Exception as exc:
+            st.warning("⚠️ Could not load metadata.joblib. Falling back to dataset labels.")
+            st.caption(f"Reason: {exc}")
+
+    if label_to_name is None:
+        try:
+            full_dataframe, label_to_name, _ = load_cached_data()
+        except Exception:
+            st.warning("⚠️ Could not load dataset labels. Please train models first.")
+            st.stop()
     
     st.subheader("Enter Sensor Readings")
     st.info("Enter values for the following MQ sensor readings:")
@@ -475,7 +572,7 @@ elif page == "Make Prediction":
             )
     
     # Model selection (paper-aligned, with legacy fallback)
-    model_names = list(metadata.get('test_results', {}).keys())
+    model_names = list(metadata.get('test_results', {}).keys()) if metadata else []
     model_file_map = {}
 
     if model_names:
