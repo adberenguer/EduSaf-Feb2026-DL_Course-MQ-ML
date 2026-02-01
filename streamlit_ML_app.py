@@ -340,7 +340,7 @@ st.markdown(
 # Sidebar
 st.sidebar.header("Navigation")
 page = st.sidebar.radio(
-    "Go to",["🏠 Home", "🛠️ Train Models", "📊 View Performance", "🔮 Make Prediction"]
+    "Go to",["🏠 Home", "🛠️ Train Models", "📊 Model Comparison", "🔮 Make Prediction"]
 )
 
 # Load data (cached)
@@ -494,7 +494,7 @@ elif page == "🛠️ Train Models":
                                            key=lambda x: x.astype(float))
         st.dataframe(summary_df, use_container_width=True)
 
-elif page == "📊 View Performance":
+elif page == "📊 Model Comparison":
     st.header("Model Performance Analysis")
     
     # Check if models are trained
