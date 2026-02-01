@@ -936,8 +936,8 @@ def compute_metrics_from_labels(y_true, y_pred):
     }
 
 @st.cache_data
-def load_sequences_from_dir(data_dir, sequence_length, window_stride):
-    """Load raw sequences and labels from CSV files in data_dir."""
+def load_test_sequences_from_dir(data_dir, sequence_length, window_stride):
+    """Load raw sequences and return only the test split."""
     freshness_mapping = {'D1': 0, 'D2': 1, 'D3': 2, 'D4': 3, 'D5': 4}
     freshness_labels = {v: k for k, v in freshness_mapping.items()}
 
@@ -978,7 +978,19 @@ def load_sequences_from_dir(data_dir, sequence_length, window_stride):
     if not all_sequences:
         raise ValueError("No valid data sequences found in the data directory.")
 
-    return np.array(all_sequences, dtype=np.float32), np.array(all_labels, dtype=np.int64), freshness_labels
+    sequences = np.array(all_sequences, dtype=np.float32)
+    labels = np.array(all_labels, dtype=np.int64)
+
+    _, test_indices = train_test_split(
+        range(len(sequences)),
+        test_size=0.25,
+        random_state=42,
+        stratify=labels
+    )
+    test_sequences = sequences[test_indices]
+    test_labels = labels[test_indices]
+
+    return test_sequences, test_labels, freshness_labels
 
 def select_configuration_with_filters(config_info_list, key_prefix="", show_preprocessing_help=True):
     """Render cascading select boxes and return chosen configuration."""
@@ -1444,18 +1456,9 @@ elif page == "🔮 Make Prediction":
         window_stride = prep_config.get('window_stride')
 
         try:
-            sequences, labels, freshness_labels = load_sequences_from_dir(
+            test_sequences, test_labels, freshness_labels = load_test_sequences_from_dir(
                 data_dir, sequence_length, window_stride
             )
-
-            _, test_indices = train_test_split(
-                range(len(sequences)),
-                test_size=0.25,
-                random_state=42,
-                stratify=labels
-            )
-            test_sequences = sequences[test_indices]
-            test_labels = labels[test_indices]
 
             st.markdown("### ✅ Quality Control Decision Examples")
             max_examples = min(10, len(test_sequences))
