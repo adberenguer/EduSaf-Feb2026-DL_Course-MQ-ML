@@ -24,33 +24,92 @@ HAS_XGBOOST = importlib.util.find_spec("xgboost") is not None
 
 # Set page config
 st.set_page_config(
-    page_title="Classification of fresh fruit types based on MQ array sensor data",
+    page_title="🍌 🍅 🍊 Fruit Classification ML Pipeline Demo app | Following Hananto & Ridwan (2025)",
     page_icon="🍎",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for fancy UI
 st.markdown("""
     <style>
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #1f77b4;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: white;
         text-align: center;
         margin-bottom: 2rem;
     }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 0.5rem 0;
+    
+    .main-header h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
+    
+    .main-header p {
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
+        opacity: 0.9;
+    }
+    
+    .metric-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stButton>button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
     .info-box {
-        background: #eef5ff;
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
         padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
+        border-radius: 10px;
+        border-left: 5px solid #667eea;
         margin: 1rem 0;
+    }
+    
+    .success-box {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 5px solid #00c851;
+        margin: 1rem 0;
+    }
+    
+    .warning-box {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 5px solid #ff8800;
+        margin: 1rem 0;
+    }
+    
+    .sidebar .sidebar-content {
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -266,7 +325,8 @@ def plot_confusion_matrix(y_test, y_pred, label_to_name, model_name):
     return fig
 
 # Main App
-st.markdown('<h1 class="main-header">🍎 Fruit Classification ML Pipeline | Following the approach proposed by Hananto & Ridwan (2025)</h1>', unsafe_allow_html=True)
+#st.markdown('<h1 class="main-header">🍎 🍌 🍅 🍊 Fruit Classification ML Pipeline | Following the approach proposed by Hananto & Ridwan (2025)</h1>', unsafe_allow_html=True)
+
 st.markdown(
     "<div class='metric-card'>"
     "<b>Reference:</b> Hananto & Ridwan (2025) — Performance comparison of algorithms in the classification "

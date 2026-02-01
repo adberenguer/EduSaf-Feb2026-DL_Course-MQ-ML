@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 # Set page config with fancy theme
 st.set_page_config(
-    page_title="🍎 Fruit Quality Monitoring Demo app | Deep Learning Models",
+    page_title="🍎 🍌 🍅 🍊 Fruit Quality Monitoring Demo App | Deep Learning Models",
     page_icon="🍎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -1167,7 +1167,7 @@ st.sidebar.title("🍎 Navigation")
 page = st.sidebar.radio("Go to", ["🏠 Home", "📊 Model Comparison", "🔍 Training Analysis", "🔮 Make Prediction"])
 
 # Home page
-if page == "🏠 Home":
+if page == "🛠️ Train Models":
     st.markdown("""
         <div class="main-header">
             <h1>🍎 Fruit Quality Monitoring</h1>
