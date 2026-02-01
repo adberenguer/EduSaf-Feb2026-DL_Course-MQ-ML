@@ -280,8 +280,7 @@ st.markdown(
 # Sidebar
 st.sidebar.header("Navigation")
 page = st.sidebar.radio(
-    "Go to",
-    ["🏠 Home", "🛠️ Train Models", "📊 View Performance", "🔮 Make Prediction"]
+    "Go to",["🏠 Home", "🛠️ Train Models", "📊 View Performance", "🔮 Make Prediction"]
 )
 
 # Load data (cached)
@@ -292,7 +291,7 @@ def load_cached_data():
 if page == "🏠 Home":
     st.markdown("""
         <div class="main-header">
-            <h1>🍎 Machine Learning Dashboard - Fruit Freshness Classification</h1>
+            <h1>🍎 🍌 🍅 🍊 Machine Learning Dashboard - Fruit Classification based on VOC sensor data</h1>
             <p>Machine Learning Dashboard — Hananto & Ridwan (2025) inspired workflow</p>
             <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can MQ gas sensors classify fresh fruit types to improve quality monitoring?</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Non‑destructive, low‑cost monitoring for smart agriculture and supply chains.</small></p>
@@ -313,7 +312,7 @@ if page == "🏠 Home":
         **Workflow**
         - Combine all fruit CSV files (excluding D1–D5 drift files).
         - Random train/test split (80/20).
-        - Train each algorithm and compare metrics.
+        - Train each algorithm 5 fold cross validation and compare metrics.
 
         **Metrics**
         - **Accuracy**: overall correctness.
@@ -342,7 +341,7 @@ if page == "🏠 Home":
     else:
         st.info("ℹ️ No saved models found yet. Train models to create them.")
 
-elif page == "Train Models":
+elif page == "🛠️ Train Models":
     st.header("Train Machine Learning Models")
     
     # List the models that will be trained
@@ -435,7 +434,7 @@ elif page == "Train Models":
                                            key=lambda x: x.astype(float))
         st.dataframe(summary_df, use_container_width=True)
 
-elif page == "View Performance":
+elif page == "📊 View Performance":
     st.header("Model Performance Analysis")
     
     # Check if models are trained
@@ -527,7 +526,7 @@ elif page == "View Performance":
         if y_pred is None:
             st.warning("⚠️ Predictions (y_pred) not available for this model.")
 
-elif page == "Make Prediction":
+elif page == "🔮 Make Prediction":
     st.header("Make Predictions")
     
     # Check if models exist
@@ -631,5 +630,5 @@ elif page == "Make Prediction":
 
 # Footer
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>Fruit Classification ML Pipeline | Built with Streamlit</p>", 
+st.markdown("<p style='text-align: center; color: gray;'>Machine Learning Demo App - Fruit Classification based on VOC sensor data | Hananto & Ridwan (2025) inspired workflow</p>", 
             unsafe_allow_html=True)
