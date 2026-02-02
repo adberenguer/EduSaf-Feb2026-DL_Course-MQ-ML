@@ -1077,8 +1077,20 @@ elif page == "📊 Model Comparison":
             st.warning("⚠️ No trained models found yet. Train models first.")
             st.stop()
         latest = files[-1]
-        bundle = joblib.load(latest)
-        st.info(f"Loaded latest saved bundle: {os.path.basename(latest)}")
+        try:
+            bundle = joblib.load(latest)
+            st.info(f"Loaded latest saved bundle: {os.path.basename(latest)}")
+        except ModuleNotFoundError as exc:
+            st.error(
+                "Could not load the latest bundle because a required library is missing in this environment. "
+                "This can happen if the bundle was trained with a model (e.g., XGBoost) that is not installed on the server."
+            )
+            st.info(
+                f"Missing module: {exc.name}. "
+                "Fix options: install the missing package in the deployment environment, "
+                "or retrain models there without that model."
+            )
+            st.stop()
 
     results = bundle["results"]
     y_test = bundle["y_test"]
