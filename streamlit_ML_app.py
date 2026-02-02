@@ -358,10 +358,10 @@ if page == "🏠 Home":
 
     with st.expander("📘 Workflow & Metrics Guide", expanded=False):
         st.markdown("""
-        **Workflow**
+        **Workflow**    
         - Combine all fruit CSV files (excluding D1–D5 drift files).
         - Random train/test split (80/20).
-        - Train each algorithm 5 fold cross validation and compare metrics.
+        - Train each algorithm and compare metrics on the test set.
 
         **Metrics**
         - **Accuracy**: overall correctness.
