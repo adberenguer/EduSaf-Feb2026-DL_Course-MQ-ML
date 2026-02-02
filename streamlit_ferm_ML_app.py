@@ -640,18 +640,6 @@ st.markdown(
 # Sidebar navigation
 # -------------------------
 st.sidebar.header("Navigation")
-st.sidebar.subheader("Bundle cleanup")
-auto_cleanup = st.sidebar.checkbox("Auto-delete old bundles", value=True)
-retention_days = st.sidebar.number_input(
-    "Delete bundles older than (days)",
-    min_value=0.0,
-    value=1.0,
-    step=0.5
-)
-if auto_cleanup and retention_days > 0:
-    deleted = cleanup_old_bundles(days=float(retention_days))
-    if deleted:
-        st.sidebar.caption(f"Deleted {deleted} old bundle(s).")
 page = st.sidebar.radio("Go to", [
     "🏠 Home",
     "📥 Load & Explore Data",
@@ -1172,6 +1160,31 @@ elif page == "📊 Model Comparison":
 # -------------------------
 elif page == "🔮 Online Endpoint Prediction":
     st.header("Online Endpoint Prediction (Current Process State → Endpoint?)")
+
+    st.markdown("""
+    <div class="info-box">
+        <b>Bundle cleanup (optional):</b><br/>
+        You can automatically delete older saved bundles to keep storage small.
+        Set how many days to keep, then enable auto‑cleanup.
+    </div>
+    """, unsafe_allow_html=True)
+
+    cleanup_col1, cleanup_col2 = st.columns([1, 2])
+    with cleanup_col1:
+        cleanup_clicked = st.button("🧹 Clean old bundles")
+    with cleanup_col2:
+        retention_days = st.number_input(
+            "Delete bundles older than (days)",
+            min_value=0.0,
+            value=1.0,
+            step=0.5
+        )
+    if cleanup_clicked:
+        if retention_days > 0:
+            deleted = cleanup_old_bundles(days=float(retention_days))
+            st.caption(f"Deleted {deleted} old bundle(s).")
+        else:
+            st.warning("Set days > 0 to delete old bundles.")
 
     files = sorted(glob.glob(os.path.join(MODELS_DIR, "endpoint_models_*.joblib")))
     if not files:
