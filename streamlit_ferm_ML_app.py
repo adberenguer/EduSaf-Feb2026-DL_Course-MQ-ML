@@ -499,7 +499,7 @@ def define_models_binary():
             ("scaler", StandardScaler()),
             ("clf", KNeighborsClassifier(n_neighbors=11))
         ]),
-        "SVM (RBF)": Pipeline([
+        "SVM": Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
             ("scaler", StandardScaler()),
             ("clf", SVC(kernel="rbf", C=1.0, gamma="scale", probability=True, random_state=42))
