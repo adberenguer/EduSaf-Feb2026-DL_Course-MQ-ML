@@ -126,6 +126,25 @@ MODELS_DIR = "saved_models_fermentation"
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # -------------------------
+# Helper: cleanup old bundles
+# -------------------------
+def cleanup_old_bundles(days: float = 1.0) -> int:
+    """
+    Delete saved bundles older than N days.
+    Returns the number of deleted files.
+    """
+    cutoff = time.time() - (days * 24 * 60 * 60)
+    deleted = 0
+    for path in glob.glob(os.path.join(MODELS_DIR, "endpoint_models_*.joblib")):
+        try:
+            if os.path.getmtime(path) < cutoff:
+                os.remove(path)
+                deleted += 1
+        except Exception:
+            continue
+    return deleted
+
+# -------------------------
 # Helper: robust text reader
 # -------------------------
 def _read_txt_as_dataframe(path: str) -> pd.DataFrame:
@@ -621,6 +640,18 @@ st.markdown(
 # Sidebar navigation
 # -------------------------
 st.sidebar.header("Navigation")
+st.sidebar.subheader("Bundle cleanup")
+auto_cleanup = st.sidebar.checkbox("Auto-delete old bundles", value=True)
+retention_days = st.sidebar.number_input(
+    "Delete bundles older than (days)",
+    min_value=0.0,
+    value=1.0,
+    step=0.5
+)
+if auto_cleanup and retention_days > 0:
+    deleted = cleanup_old_bundles(days=float(retention_days))
+    if deleted:
+        st.sidebar.caption(f"Deleted {deleted} old bundle(s).")
 page = st.sidebar.radio("Go to", [
     "🏠 Home",
     "📥 Load & Explore Data",
