@@ -128,12 +128,12 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 # -------------------------
 # Helper: cleanup old bundles
 # -------------------------
-def cleanup_old_bundles(days: float = 1.0) -> int:
+def cleanup_old_bundles(minutes: float = 60.0) -> int:
     """
-    Delete saved bundles older than N days.
+    Delete saved bundles older than N minutes.
     Returns the number of deleted files.
     """
-    cutoff = time.time() - (days * 24 * 60 * 60)
+    cutoff = time.time() - (minutes * 60)
     deleted = 0
     for path in glob.glob(os.path.join(MODELS_DIR, "endpoint_models_*.joblib")):
         try:
@@ -1164,8 +1164,8 @@ elif page == "🔮 Online Endpoint Prediction":
     st.markdown("""
     <div class="info-box">
         <b>Bundle cleanup (optional):</b><br/>
-        You can automatically delete older saved bundles to keep storage small.
-        Set how many days to keep, then enable auto‑cleanup.
+        You can delete older saved bundles to keep storage small.
+        Set how many minutes to keep, then click the button.
     </div>
     """, unsafe_allow_html=True)
 
@@ -1173,18 +1173,18 @@ elif page == "🔮 Online Endpoint Prediction":
     with cleanup_col1:
         cleanup_clicked = st.button("🧹 Clean old bundles")
     with cleanup_col2:
-        retention_days = st.number_input(
-            "Delete bundles older than (days)",
+        retention_minutes = st.number_input(
+            "Delete bundles older than (minutes)",
             min_value=0.0,
-            value=1.0,
-            step=0.5
+            value=60.0,
+            step=5.0
         )
     if cleanup_clicked:
-        if retention_days > 0:
-            deleted = cleanup_old_bundles(days=float(retention_days))
+        if retention_minutes > 0:
+            deleted = cleanup_old_bundles(minutes=float(retention_minutes))
             st.caption(f"Deleted {deleted} old bundle(s).")
         else:
-            st.warning("Set days > 0 to delete old bundles.")
+            st.warning("Set minutes > 0 to delete old bundles.")
 
     files = sorted(glob.glob(os.path.join(MODELS_DIR, "endpoint_models_*.joblib")))
     if not files:
