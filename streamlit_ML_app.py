@@ -7,8 +7,9 @@ import joblib
 import time
 import importlib.util
 from datetime import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # Machine Learning imports
 from sklearn.model_selection import train_test_split
@@ -24,7 +25,7 @@ HAS_XGBOOST = importlib.util.find_spec("xgboost") is not None
 
 # Set page config
 st.set_page_config(
-    page_title="🍌 🍅 🍊 Fruit Classification ML Pipeline Demo app | Following Hananto & Ridwan (2025)",
+    page_title="🍌 🍅 🍊 Fruit Types Classification ML Pipeline Demo app | Following Hananto & Ridwan (2025)",
     page_icon="🍎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -232,9 +233,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, models):
     return trained_models, test_results
 
 def plot_performance_comparison(test_results):
-    """Plot performance comparison (accuracy, precision, recall, F1-score)."""
-    import numpy as np
-
+    """Plot performance comparison (accuracy, precision, recall, F1-score) with Plotly."""
     models = list(test_results.keys())
     metrics = [
         ("Accuracy", "accuracy"),
@@ -243,46 +242,42 @@ def plot_performance_comparison(test_results):
         ("F1-Score", "f1_score")
     ]
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharey=True)
-    axes = axes.flatten()
-
-    for ax, (title, key) in zip(axes, metrics):
+    fig = make_subplots(rows=2, cols=2, subplot_titles=[m[0] for m in metrics])
+    for idx, (title, key) in enumerate(metrics):
+        row = idx // 2 + 1
+        col = idx % 2 + 1
         values = [test_results[m][key] for m in models]
-        ax.bar(np.arange(len(models)), values, color="tab:blue", alpha=0.85)
-        ax.set_title(title)
-        ax.set_xticks(np.arange(len(models)))
-        ax.set_xticklabels(models, rotation=25, ha='right')
-        ax.set_ylim(0, 1.05)
-        ax.set_ylabel(title)
-        ax.grid(axis='y', linestyle='--', alpha=0.4)
+        fig.add_trace(
+            go.Bar(x=models, y=values, name=title),
+            row=row,
+            col=col
+        )
 
-    plt.tight_layout()
+    fig.update_layout(height=700, showlegend=False)
+    fig.update_yaxes(range=[0, 1.05])
+    fig.update_xaxes(tickangle=25)
     return fig
 
 def plot_performance_comparison_legacy(test_results):
-    """Plot comparison for legacy metadata (accuracy & F1-score only)."""
-    import numpy as np
-
+    """Plot comparison for legacy metadata (accuracy & F1-score only) with Plotly."""
     models = list(test_results.keys())
     metrics = [
         ("Accuracy", "accuracy"),
         ("F1-Score", "f1_score")
     ]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4), sharey=True)
-    axes = axes.flatten()
-
-    for ax, (title, key) in zip(axes, metrics):
+    fig = make_subplots(rows=1, cols=2, subplot_titles=[m[0] for m in metrics])
+    for idx, (title, key) in enumerate(metrics):
         values = [test_results[m][key] for m in models]
-        ax.bar(np.arange(len(models)), values, color="tab:orange", alpha=0.85)
-        ax.set_title(title)
-        ax.set_xticks(np.arange(len(models)))
-        ax.set_xticklabels(models, rotation=25, ha='right')
-        ax.set_ylim(0, 1.05)
-        ax.set_ylabel(title)
-        ax.grid(axis='y', linestyle='--', alpha=0.4)
+        fig.add_trace(
+            go.Bar(x=models, y=values, name=title),
+            row=1,
+            col=idx + 1
+        )
 
-    plt.tight_layout()
+    fig.update_layout(height=400, showlegend=False)
+    fig.update_yaxes(range=[0, 1.05])
+    fig.update_xaxes(tickangle=25)
     return fig
 
 def map_model_filename_to_label(filename):
@@ -293,35 +288,29 @@ def map_model_filename_to_label(filename):
         "knn": "KNN",
         "logistic_regression": "Logistic Regression",
         "random_forest": "Random Forest",
-        "svm": "SVM (Legacy)",
+        "svm": "SVM",
         "xgboost": "XGBoost (Legacy)"
     }
     return mapping.get(base, base.replace("_", " ").title())
 
 def plot_confusion_matrix(y_test, y_pred, label_to_name, model_name):
-    """Plot confusion matrix with robust handling and Streamlit support"""
-    import matplotlib.pyplot as plt
-    import seaborn as sns
+    """Plot confusion matrix with Plotly."""
     from sklearn.metrics import confusion_matrix
 
-    # Prepare mapping from labels to integer indices if needed
-    # Get all unique classes from both y_test and y_pred to avoid missing classes in cm display
     unique_labels = np.unique(np.concatenate([y_test, y_pred]))
-    # Ensure that label_to_name includes all present labels
     class_names = [label_to_name[i] if i in label_to_name else str(i) for i in unique_labels]
-
     cm = confusion_matrix(y_test, y_pred, labels=unique_labels)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-                xticklabels=class_names, yticklabels=class_names, ax=ax, cbar=False)
-    ax.set_title(f'Confusion Matrix - {model_name}', fontsize=15)
-    ax.set_ylabel('True Label', fontsize=12)
-    ax.set_xlabel('Predicted Label', fontsize=12)
-    ax.tick_params(axis='x', rotation=45)
-    ax.tick_params(axis='y', rotation=0)
-    fig.tight_layout()
-
+    fig = px.imshow(
+        cm,
+        x=class_names,
+        y=class_names,
+        color_continuous_scale="Blues",
+        text_auto=True,
+        aspect="auto",
+        title=f"Confusion Matrix - {model_name}"
+    )
+    fig.update_layout(xaxis_title="Predicted", yaxis_title="Actual")
     return fig
 
 # Main App
@@ -351,7 +340,7 @@ def load_cached_data():
 if page == "🏠 Home":
     st.markdown("""
         <div class="main-header">
-            <h1>🍎 🍌 🍅 🍊 Machine Learning Dashboard - Fruit Classification based on VOC sensor data</h1>
+            <h1>🍎 🍌 🍅 🍊 Machine Learning Dashboard - Fruit Types Classification based on VOC sensor data</h1>
             <p>Machine Learning Dashboard — Hananto & Ridwan (2025) inspired workflow</p>
             <p style='margin: 0.35rem 0;'><small><strong>Problem Statement:</strong> How can MQ gas sensors classify fresh fruit types to improve quality monitoring?</small></p>
             <p style='margin: 0.35rem 0;'><small><strong>Why it matters:</strong> Non‑destructive, low‑cost monitoring for smart agriculture and supply chains.</small></p>
@@ -521,6 +510,47 @@ elif page == "📊 Model Comparison":
     if not test_results:
         st.error("No performance data available.")
         st.stop()
+
+    # Ensure all saved models (including XGBoost) appear in comparison
+    models_dir = 'saved_models'
+    model_files = [f for f in glob.glob(os.path.join(models_dir, "*.joblib")) if "metadata" not in f]
+    missing_models = []
+    for path in model_files:
+        label = map_model_filename_to_label(path)
+        if label not in test_results:
+            missing_models.append((label, path))
+
+    if missing_models:
+        with st.spinner("Evaluating missing models for comparison..."):
+            full_dataframe, label_to_name, _ = load_cached_data()
+            feature_columns = ['MQ2', 'MQ3', 'MQ4', 'MQ5', 'MQ6', 'MQ7', 'MQ8', 'MQ9', 'MQ135']
+            X = full_dataframe[feature_columns].values
+            y = full_dataframe['label'].values
+            X_train, X_test, y_train, y_test_eval = train_test_split(
+                X, y, test_size=0.2, random_state=42, stratify=y
+            )
+            st.session_state['y_test'] = y_test_eval
+            st.session_state['label_to_name'] = label_to_name
+
+            for label, path in missing_models:
+                try:
+                    model = joblib.load(path)
+                    start_test = time.perf_counter()
+                    y_pred = model.predict(X_test)
+                    test_time = time.perf_counter() - start_test
+                    test_results[label] = {
+                        'accuracy': accuracy_score(y_test_eval, y_pred),
+                        'precision': precision_score(y_test_eval, y_pred, average='macro', zero_division=0),
+                        'recall': recall_score(y_test_eval, y_pred, average='macro', zero_division=0),
+                        'f1_score': f1_score(y_test_eval, y_pred, average='macro', zero_division=0),
+                        'train_time': None,
+                        'test_time': test_time,
+                        'y_pred': y_pred
+                    }
+                except Exception as exc:
+                    st.warning(f"⚠️ Could not evaluate {label}: {exc}")
+
+            st.session_state['test_results'] = test_results
     
     # Performance comparison plot
     st.subheader("Performance Comparison")
@@ -530,7 +560,7 @@ elif page == "📊 Model Comparison":
         fig = plot_performance_comparison(test_results)
     else:
         fig = plot_performance_comparison_legacy(test_results)
-    st.pyplot(fig)
+    st.plotly_chart(fig, use_container_width=True)
     
     # Detailed metrics table
     st.subheader("Detailed Metrics")
@@ -578,7 +608,7 @@ elif page == "📊 Model Comparison":
     
     if y_test is not None and y_pred is not None and label_to_name:
         fig_cm = plot_confusion_matrix(y_test, y_pred, label_to_name, selected_model)
-        st.pyplot(fig_cm)
+        st.plotly_chart(fig_cm, use_container_width=True)
     else:
         st.info("ℹ️ Confusion matrix is only available for freshly trained models. Please train models first to see confusion matrices.")
         if y_test is None:
@@ -641,13 +671,13 @@ elif page == "🔮 Make Prediction":
             if os.path.exists(model_path):
                 model_file_map[name] = model_path
 
-    if not model_file_map:
-        legacy_files = [f for f in glob.glob(os.path.join(models_dir, "*.joblib")) if "metadata" not in f]
-        for path in legacy_files:
-            label = map_model_filename_to_label(path)
+    legacy_files = [f for f in glob.glob(os.path.join(models_dir, "*.joblib")) if "metadata" not in f]
+    for path in legacy_files:
+        label = map_model_filename_to_label(path)
+        if label not in model_file_map:
             model_file_map[label] = path
-        if any("Legacy" in name for name in model_file_map.keys()):
-            st.info("ℹ️ Using legacy models (SVM/XGBoost). Retrain to align with the Hananto paper.")
+    # if any("Legacy" in name for name in model_file_map.keys()):
+    #     st.info("ℹ️ Using legacy models (XGBoost). Retrain to align with the Hananto paper.")
 
     if not model_file_map:
         st.error("No model files found! Please train models first.")
@@ -681,14 +711,26 @@ elif page == "🔮 Make Prediction":
             st.dataframe(prob_df, use_container_width=True)
             
             # Bar chart
-            fig, ax = plt.subplots(figsize=(10, 6))
-            ax.barh(prob_df['Fruit'], prob_df['Probability'])
-            ax.set_xlabel('Probability')
-            ax.set_title('Prediction Probabilities')
-            ax.set_xlim([0, 1])
-            st.pyplot(fig)
+            fig = px.bar(
+                prob_df,
+                x="Probability",
+                y="Fruit",
+                orientation="h",
+                title="Prediction Probabilities",
+                range_x=[0, 1]
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
 # Footer
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>Machine Learning Demo App - Fruit Classification based on VOC sensor data | Hananto & Ridwan (2025) inspired workflow</p>", 
-            unsafe_allow_html=True)
+# st.markdown("<p style='text-align: center; color: gray;'>Machine Learning Demo App - Fruit Classification based on VOC sensor data | Hananto & Ridwan (2025) inspired workflow</p>", 
+#             unsafe_allow_html=True)
+st.markdown("""
+    <div style='text-align: center; color: #666; padding: 1rem;'>
+        <p style='font-size: 1.05rem; font-weight: 600;'>🍎 Fruit Quality Classiccation Demo app| Machine Learning Models</p>
+        <p style='margin: 0.35rem 0;'><small>Compare multiple (pre-) trained ML models for fruit types classification based on VOC sensor data. Hananto & Ridwan (2025) inspired workflow</small>
+        <br>
+        <small>Hananto & Ridwan (2025) — Performance comparison of algorithms in the classification of fresh fruit types based on MQ array sensor data.</small></small></p>
+    </div>
+""", unsafe_allow_html=True)
+
