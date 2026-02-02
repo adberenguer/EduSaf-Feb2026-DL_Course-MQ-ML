@@ -967,7 +967,7 @@ elif page == "🛠️ Train Endpoint Models":
         <b>What happens during training:</b><br/>
         • The app turns each time point into simple features (time, pH, NaOH, signal, and rate).<br/>
         • We split by <b>fermentation run</b> so the model is tested on new runs it never saw.<br/>
-        • We train multiple models and compare their accuracy, precision, recall, F1, and ROC-AUC.
+        • We train multiple models and compare their accuracy, precision, recall, and F1.
     </div>
     """, unsafe_allow_html=True)
 
@@ -1000,7 +1000,7 @@ elif page == "🛠️ Train Endpoint Models":
         test_counts = y_test.value_counts().to_dict()
         st.caption(f"Train label counts: {train_counts} | Test label counts: {test_counts}")
         if y_train.nunique() < 2 or y_test.nunique() < 2:
-            st.warning("Only one class is present in the train/test split. Precision/Recall/F1 and ROC-AUC may be 0 or undefined.")
+            st.warning("Only one class is present in the train/test split. Precision/Recall/and F1 may be 0 or undefined.")
         models = define_models_binary()
 
         with st.spinner("Training..."):
@@ -1035,7 +1035,6 @@ elif page == "🛠️ Train Endpoint Models":
                 "Precision": r["precision"],
                 "Recall": r["recall"],
                 "F1": r["f1_score"],
-                "ROC-AUC": r["roc_auc"],
                 "Train Time (s)": r["train_time"],
                 "Test Time (s)": r["test_time"]
             })
@@ -1046,8 +1045,7 @@ elif page == "🛠️ Train Endpoint Models":
                 "Balanced Acc": "{:.3f}",
                 "Precision": "{:.3f}",
                 "Recall": "{:.3f}",
-                "F1": "{:.3f}",
-                "ROC-AUC": (lambda v: "—" if pd.isna(v) else f"{v:.3f}"),
+                "F1": "{:.3f}",   
                 "Train Time (s)": "{:.2f}",
                 "Test Time (s)": "{:.2f}"
             }),
@@ -1069,7 +1067,6 @@ elif page == "📊 Model Comparison":
         • <b>Precision</b>: when the model says “endpoint”, how often it’s right.<br/>
         • <b>Recall</b>: how many true endpoints the model catches.<br/>
         • <b>F1</b>: balanced score that combines precision and recall.<br/>
-        • <b>ROC-AUC</b>: ranking quality (higher is better; 0.5 is random).
     </div>
     """, unsafe_allow_html=True)
 
@@ -1102,7 +1099,6 @@ elif page == "📊 Model Comparison":
             "Precision": v["precision"],
             "Recall": v["recall"],
             "F1": v["f1_score"],
-            "ROC-AUC": v["roc_auc"]
         }
         for k, v in results.items()
     ]).sort_values("F1", ascending=False)
@@ -1113,7 +1109,6 @@ elif page == "📊 Model Comparison":
             "Precision": "{:.3f}",
             "Recall": "{:.3f}",
             "F1": "{:.3f}",
-            "ROC-AUC": (lambda v: "—" if pd.isna(v) else f"{v:.3f}")
         }),
         use_container_width=True
     )
