@@ -1150,7 +1150,18 @@ elif page == "🔮 Online Endpoint Prediction":
 
     selected_bundle_path = st.selectbox("Select a trained bundle", [os.path.basename(f) for f in files], index=len(files)-1)
     st.caption("A trained bundle is a saved package of models + label settings from a previous training run.")
-    bundle = joblib.load(os.path.join(MODELS_DIR, selected_bundle_path))
+    try:
+        bundle = joblib.load(os.path.join(MODELS_DIR, selected_bundle_path))
+    except ModuleNotFoundError as exc:
+        st.error(
+            "Could not load this bundle because a required library is missing in the current environment. "
+            "This usually happens if the bundle was trained with a model (e.g., XGBoost) that is not installed here."
+        )
+        st.info(
+            f"Missing module: {exc.name}. "
+            "Fix options: install the missing package, or retrain models in this environment without that model."
+        )
+        st.stop()
 
     models = bundle["trained_models"]
     feature_cols = bundle["feature_columns"]
