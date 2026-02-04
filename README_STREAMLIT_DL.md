@@ -4,10 +4,10 @@ A Streamlit web application for visualizing and comparing pre-trained deep learn
 
 ## Features
 
-- **📊 Model Comparison**: Compare multiple pre-trained model configurations side-by-side
-- **🔍 Training Analysis**: View training curves, confusion matrices, and classification reports for each configuration
-- **🔮 Make Predictions**: Use any pre-trained configuration to make predictions on new sensor data
-- **📦 Configuration Management**: Load and compare different hyperparameter configurations
+- **📊 Model Comparison**: Compare multiple pre-trained model configurations side-by-side (test metrics)
+- **🔍 Training Analysis**: View training curves, confusion matrices, and classification reports
+- **🔮 Make Predictions**: Generate quality-control decision examples using the built-in dataset (no upload required)
+- **📦 Configuration Management**: Load and compare different hyperparameter + preprocessing configurations
 
 ## Important Note
 
@@ -45,24 +45,25 @@ streamlit run streamlit_DL_app.py
 - Overview of loaded configurations
 - List of all available model configurations
 - Information about each configuration
+- Configuration & analysis guide (preprocessing options and architectures)
 
 ### 📊 Model Comparison Page
 - Side-by-side comparison of all configurations
 - Interactive bar charts comparing metrics (Accuracy, Precision, Recall, F1-Score)
 - Detailed metrics table
-- Compare test set performance across all configurations
+- Comparison uses **test-set metrics only** for fairness
 
 ### 🔍 Training Analysis Page
 - Select a specific configuration to analyze
 - View training curves (loss and accuracy over epochs)
-- Interactive confusion matrix for test set
-- Classification report with per-class metrics
+- Confusion matrices for validation and test sets (when available)
+- Classification reports with per-class metrics
 
 ### 🔮 Make Prediction Page
-- Upload CSV file with sensor data
 - Select a configuration to use for prediction
-- View predicted freshness class
-- Interactive probability visualization
+- Uses the built-in dataset from `AllSmaples-Report/` (no upload needed)
+- Set a confidence threshold for decisions
+- Generate quality-control decision examples (predicted class, confidence, action, reason)
 - Proper preprocessing is automatically applied using saved configurations
 
 ## File Structure
@@ -106,23 +107,23 @@ Configurations are saved with descriptive names:
 
 ## Data Structure
 
-For predictions, the app expects CSV files with:
+For predictions, the app uses `AllSmaples-Report/` automatically:
 - Sensor columns (MQ2, MQ3, MQ4, MQ5, MQ6, MQ7, MQ8, MQ9, MQ135)
 - Each row represents a time step
-- The app automatically handles preprocessing based on the saved configuration
+- The app handles preprocessing based on each saved configuration
 
 ## Tips
 
 1. **Training**: Train all configurations in the notebook first before using the dashboard
 2. **Comparison**: Use the Model Comparison page to identify the best performing configuration
 3. **Analysis**: Use Training Analysis to understand model behavior and identify potential issues
-4. **Predictions**: The app automatically applies the correct preprocessing for each configuration
+4. **Predictions**: Use the confidence threshold to see different QC decisions
 
 ## Troubleshooting
 
 - **No models found**: Make sure you've trained and saved models in the notebook first
 - **Missing scaler**: If you used normalization, ensure `preprocessing_scaler.pkl` exists
-- **Prediction errors**: Check that your input data matches the expected format (sensor columns)
+- **Prediction errors**: Check that `AllSmaples-Report/` exists and has the expected sensor columns
 
 ## Notes
 
